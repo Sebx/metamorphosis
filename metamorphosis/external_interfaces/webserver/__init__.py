@@ -3,9 +3,7 @@ The flask application package.
 """
 
 from flask import Flask
-
 from flask import request
-
 import threading
 import time
 import logging
