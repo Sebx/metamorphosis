@@ -88,7 +88,7 @@ This part of the architecture is made by external systems that implement the int
 
 ![Use Cases diagram.][image_ref_z6yi0c2e]
 
-<a href="https://yuml.me/3504e11b.png" target="_blank">Yuml.me link.</a>
+<a href="https://yuml.me/3504e11b.jpg" target="_blank">Yuml.me link.</a>
 
 
 ## Sequence diagram.<a name="sequence"></a>
@@ -105,8 +105,7 @@ The global structure of the package has been built reflecting the layered struct
 ```  
 └── metamorphosis
     ├── core
-    │   ├── shared
-    │   └── confluent_kafka
+    │   └── shared
     ├── entities
     │   ├── app
     │   ├── deployer
