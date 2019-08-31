@@ -1,8 +1,11 @@
-import sys
 import os
-import logging
 import signal
-from ..confluent_kafka import Consumer, KafkaException, KafkaError
+import sys
+
+from confluent_kafka import Consumer as BrokerConsumer
+
+from core.shared.common import get_logger
+
 
 class Consumer(object):
 
@@ -16,25 +19,15 @@ class Consumer(object):
             'session.timeout.ms': 6000,
             'default.topic.config': {'auto.offset.reset': 'smallest'},
             'security.protocol': 'SASL_SSL',
-	        'sasl.mechanisms': 'SCRAM-SHA-256',
+            'sasl.mechanisms': 'SCRAM-SHA-256',
             'sasl.username': os.environ['CLOUDKARAFKA_USERNAME'],
             'sasl.password': os.environ['CLOUDKARAFKA_PASSWORD']
         }
-
-        #self.c =
-        #c.subscribe(self.topics)
-        #self.topics = os.environ['CLOUDKARAFKA_TOPIC'].split(",")
         
-        self.consumer = Consumer(**self.config)
+        self.topic_prefix = os.environ['CLOUDKARAFKA_TOPIC_PREFIX']
+        self.consumer = BrokerConsumer(**self.config)
         self.handlers = {}
-        logger = logging.getLogger('metamorphosis-consumer')
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-        formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s')
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
-        logger.setLevel(logging.INFO)
-        self.logger = logger
+        self.logger = get_logger()
 
         return super().__init__(*args, **kwargs)
 
@@ -59,26 +52,29 @@ class Consumer(object):
             self.logger.critical(str(e), exc_info=1)
             self.consumer.close()
             sys.exit("Exited due to exception")
-    
+
     def signal_term_handler(self, signal, frame):
         self.logger.info("closing consumer")
         self.consumer.close()
         sys.exit(0)
 
     def start(self):
-        self.consumer.subscribe(topics=tuple(self.handlers.keys()))
+        #
+        self.consumer.subscribe(topics=["siumlj60-default"])
+        #self.consumer.subscribe(topics=" ".join(self.handlers.keys()))
         self.logger.info("starting consumer...registered signterm")
 
         signal.signal(signal.SIGTERM, self.signal_term_handler)
         signal.signal(signal.SIGINT, self.signal_term_handler)
-        signal.signal(signal.SIGQUIT, self.signal_term_handler)
-        signal.signal(signal.SIGHUP, self.signal_term_handler)
+        #signal.signal(signal.SIGQUIT, self.signal_term_handler)
+        #signal.signal(signal.SIGHUP, self.signal_term_handler)
 
         for msg in self.consumer:
-            self.logger.info("TOPIC: {}, PAYLOAD: {}".format(msg.topic, msg.value))
+            self.logger.info(
+                "TOPIC: {}, PAYLOAD: {}".format(msg.topic, msg.value))
             self._run_handlers(msg)
 
-#try:
+# try:
 #    while True:
 #        msg = c.poll(timeout=1.0)
 
@@ -98,8 +94,12 @@ class Consumer(object):
 #                                str(msg.key())))
 #            print(msg.value())
 
-#except KeyboardInterrupt:
+# except KeyboardInterrupt:
 #    sys.stderr.write('%% Aborted by user\n')
 
-## Close down consumer to commit final offsets.
-#c.close()
+# Close down consumer to commit final offsets.
+# c.close()
+
+# self.c =
+# c.subscribe(self.topics)
+#self.topics = os.environ['CLOUDKARAFKA_TOPIC'].split(",")

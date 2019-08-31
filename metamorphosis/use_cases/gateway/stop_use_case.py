@@ -1,1 +1,2 @@
-
+def shutdown(registry):
+    pass

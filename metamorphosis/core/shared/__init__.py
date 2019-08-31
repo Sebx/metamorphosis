@@ -1,4 +1,3 @@
-import common
-import consumer
-import context_managers
-
+from . import common
+from . import consumer
+from . import context_managers
