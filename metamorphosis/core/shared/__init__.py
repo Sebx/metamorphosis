@@ -1,3 +1,3 @@
 from . import common
-from . import consumer
+from . import broker_consumer
 from . import context_managers
