@@ -65,8 +65,8 @@ class BrokerConsumer(object):
 
         signal.signal(signal.SIGTERM, self._signal_term_handler)
         signal.signal(signal.SIGINT, self._signal_term_handler)
-        signal.signal(signal.SIGQUIT, self._signal_term_handler)
-        signal.signal(signal.SIGHUP, self._signal_term_handler)
+        # signal.signal(signal.SIGQUIT, self._signal_term_handler)
+        # signal.signal(signal.SIGHUP, self._signal_term_handler)
 
         self.loop.run_until_complete(self._consume())
         # from python 3.7+ will be to wonder use
