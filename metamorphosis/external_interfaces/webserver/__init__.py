@@ -1,7 +1,13 @@
+##
+# File: external_interfaces\webserver\__init__.py.
+#
+# Summary:  Initialize class.
+
 """
 The flask application package.
 """
 
+import webserver.views
 from flask import Flask
 from flask import request
 import threading
@@ -18,7 +24,7 @@ app = Flask(__name__)
 
 app.logger.addHandler(logging.StreamHandler())
 app.logger.setLevel(logging.INFO)
-app.logger.info('app startup')
+app.logger.info("app startup")
 
 
 config = {
@@ -26,5 +32,3 @@ config = {
     "group.id": "mygroup",
     "auto.offset.reset": "earliest"
 }
-
-import webserver.views

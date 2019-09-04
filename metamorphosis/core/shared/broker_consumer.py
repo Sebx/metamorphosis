@@ -1,10 +1,16 @@
+##
+# File: core\shared\broker_consumer.py.
+#
+# Summary:  Broker consumer class.
+
 import asyncio
 import os
 import signal
 import sys
 
 from confluent_kafka import Consumer, KafkaError, KafkaException
-from core.shared.common import get_logger, info
+
+from metamorphosis.core.shared.common import get_logger, info
 
 
 class BrokerConsumer(object):
@@ -14,22 +20,22 @@ class BrokerConsumer(object):
         # See
         # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
         config = {
-            'bootstrap.servers': os.environ['CLOUDKARAFKA_BROKERS'],
-            'group.id': "%s-consumer" % os.environ['CLOUDKARAFKA_USERNAME'],
-            'session.timeout.ms': 6000,
-            'default.topic.config': {'auto.offset.reset': 'smallest'},
-            'security.protocol': 'SASL_SSL',
-            'sasl.mechanisms': 'SCRAM-SHA-256',
-            'sasl.username': os.environ['CLOUDKARAFKA_USERNAME'],
-            'sasl.password': os.environ['CLOUDKARAFKA_PASSWORD']
+            "bootstrap.servers": os.environ["CLOUDKARAFKA_BROKERS"],
+            "group.id": "%s-consumer" % os.environ["CLOUDKARAFKA_USERNAME"],
+            "session.timeout.ms": 6000,
+            "default.topic.config": {"auto.offset.reset": "smallest"},
+            "security.protocol": "SASL_SSL",
+            "sasl.mechanisms": "SCRAM-SHA-256",
+            "sasl.username": os.environ["CLOUDKARAFKA_USERNAME"],
+            "sasl.password": os.environ["CLOUDKARAFKA_PASSWORD"]
         }
 
-        self.topic_prefix = os.environ['CLOUDKARAFKA_TOPIC_PREFIX']
+        self.topic_prefix = os.environ["CLOUDKARAFKA_TOPIC_PREFIX"]
         self.consumer = Consumer(**config)
         self.handlers = {}
         self.logger = get_logger()
         self.loop = asyncio.get_event_loop()
-        return super().__init__(*args, **kwargs)
+        # return super().__init__(*args, **kwargs)
 
     def _add_handler(self, topic, handler):
         if self.handlers.get(topic) is None:
@@ -83,7 +89,8 @@ class BrokerConsumer(object):
                     # Error or event
                     if msg.error().code() == KafkaError._PARTITION_EOF:
                         # End of partition event
-                        info("Reached end at offset {0}\n".format(msg.offset()))
+                        info("Reached end at offset {0}\n".format(
+                            msg.offset()))
                     elif msg.error():
                         # Error
                         raise KafkaException(msg.error())

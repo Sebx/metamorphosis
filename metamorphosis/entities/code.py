@@ -1,10 +1,15 @@
-from entities.domain_model import DomainModel
+##
+# File: entities\code.py.
+#
+# Summary:  Code class.
+
+from metamorphosis.entities.domain_model import DomainModel
 
 
 class Code(object):
 
-    def __init__(self, id, language, language_version, dependencies, source_code):
-        self.id = id
+    def __init__(self, idx, language, language_version, dependencies, source_code):
+        self.id = idx
         self.language = language
         self.language_version = language_version
         self.dependencies = dependencies
@@ -13,21 +18,21 @@ class Code(object):
     @classmethod
     def from_dict(cls, adict):
         code = Code(
-            id=adict['id'],
-            language=adict['language'],
-            language_version=adict['language_version'],
-            dependencies=adict['dependencies'],
-            source_code=adict['source_code'],
+            id=adict["id"],
+            language=adict["language"],
+            language_version=adict["language_version"],
+            dependencies=adict["dependencies"],
+            source_code=adict["source_code"],
         )
         return code
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'language': self.language,
-            'language_version': self.language_version,
-            'dependencies': self.dependencies,
-            'source_code': self.source_code,
+            "id": self.id,
+            "language": self.language,
+            "language_version": self.language_version,
+            "dependencies": self.dependencies,
+            "source_code": self.source_code,
         }
 
     def __eq__(self, other):

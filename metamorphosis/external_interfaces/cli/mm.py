@@ -1,6 +1,7 @@
 import click
 from functools import update_wrapper
 
+
 @click.group(chain=True)
 def cli():
     """This script manages mm operation. One commands feeds into the next.
@@ -56,8 +57,8 @@ def generator(f):
     return update_wrapper(new_func, f)
 
 
-@cli.command('push')
-@click.option('-f', '--file', 'files', type=click.Path(), multiple=True, help='The code file to push to kafka.')
+@cli.command("push")
+@click.option("-f", " -- file", "files", type=click.Path(), multiple=True, help="The code file to push to kafka.")
 @generator
 def push_cmd(files):
     """Loads one or multiple code file for push to kafka. The input parameter
@@ -65,44 +66,45 @@ def push_cmd(files):
     """
     for file in files:
         try:
-            click.echo('Opening "%s"' % files)
-            if files == '-':
+            click.echo("Opening "%s"" % files)
+            if files == "-":
                 img = files.open(click.get_binary_stdin())
-                img.filename = '-'
+                img.filename = "-"
             else:
                 img = files.open(files)
             yield img
         except Exception as e:
-            click.echo('Could not open file "%s": %s' % (file, e), err=True)
+            click.echo("Could not open file "%s": %s" % (file, e), err=True)
 
 
-@cli.command('logs')
-@click.option('--filename', default='logs-%04d.txt', type=click.Path(), help='The format for the filename.', show_default=True)
+@cli.command("logs")
+@click.option(" -- filename", default="logs-%04d.txt", type=click.Path(), help="The format for the filename.", show_default=True)
 @processor
 def logs_cmd(filess, filename):
     """Saves all processed filess to a series of files."""
     for idx, files in enumerate(filess):
         try:
             fn = filename % (idx + 1)
-            click.echo('Saving "%s" as "%s"' % (files.filename, fn))
+            click.echo("Saving "%s" as "%s"" % (files.filename, fn))
             yield files.save(fn)
         except Exception as e:
-            click.echo('Could not save files "%s": %s' % (files.filename, e), err=True)
+            click.echo("Could not save files "%s": %s" %
+                       (files.filename, e), err=True)
 
 
-@cli.command('display')
+@cli.command("display")
 @processor
 def display_cmd(filess):
     """Opens all filess in an files viewer."""
     for files in filess:
-        click.echo('Displaying "%s"' % files.filename)
+        click.echo("Displaying "%s"" % files.filename)
         files.show()
         yield files
 
 
-@cli.command('publish')
-@click.option('-m', '--message', type=str, help='The message to publish.')
-@click.option('-t', '--topic', type=str, help='The topics where publish the message.')
+@cli.command("publish")
+@click.option("-m", " -- message", type=str, help="The message to publish.")
+@click.option("-t", " -- topic", type=str, help="The topics where publish the message.")
 @processor
 def resize_cmd(filess, width, height):
     """Resizes an files by fitting it into the box without changing
@@ -110,14 +112,14 @@ def resize_cmd(filess, width, height):
     """
     for files in filess:
         w, h = (width or files.size[0], height or files.size[1])
-        click.echo('Resizing "%s" to %dx%d' % (files.filename, w, h))
+        click.echo("Resizing "%s" to %dx%d" % (files.filename, w, h))
         files.thumbnail((w, h))
         yield files
 
 
-@cli.command('crop')
-@click.option('-b', '--border', type=int, help='Crop the files from all '
-              'sides by this amount.')
+@cli.command("crop")
+@click.option("-b", " -- border", type=int, help="Crop the files from all "
+              "sides by this amount.")
 @processor
 def crop_cmd(filess, border):
     """Crops an files from all edges."""
@@ -127,87 +129,82 @@ def crop_cmd(filess, border):
         if border is not None:
             for idx, val in enumerate(box):
                 box[idx] = max(0, val - border)
-            click.echo('Cropping "%s" by %dpx' % (files.filename, border))
+            click.echo("Cropping "%s" by %dpx" % (files.filename, border))
             yield copy_filename(files.crop(box), files)
         else:
             yield files
 
 
-
-
-
-
-
-
-@cli.command('transpose')
-@click.option('-r', '--rotate', callback=convert_rotation,
-              help='Rotates the files (in degrees)')
-@click.option('-f', '--flip', callback=convert_flip,
-              help='Flips the files  [LR / TB]')
+@cli.command("transpose")
+@click.option("-r", " -- rotate", callback=convert_rotation,
+              help="Rotates the files (in degrees)")
+@click.option("-f", " -- flip", callback=convert_flip,
+              help="Flips the files  [LR / TB]")
 @processor
 def transpose_cmd(filess, rotate, flip):
     """Transposes an files by either rotating or flipping it."""
     for files in filess:
         if rotate is not None:
             mode, degrees = rotate
-            click.echo('Rotate "%s" by %ddeg' % (files.filename, degrees))
+            click.echo("Rotate "%s" by %ddeg" % (files.filename, degrees))
             files = copy_filename(files.transpose(mode), files)
         if flip is not None:
             mode, direction = flip
-            click.echo('Flip "%s" %s' % (files.filename, direction))
+            click.echo("Flip "%s" %s" % (files.filename, direction))
             files = copy_filename(files.transpose(mode), files)
         yield files
 
 
-@cli.command('blur')
-@click.option('-r', '--radius', default=2, show_default=True,
-              help='The blur radius.')
+@cli.command("blur")
+@click.option("-r", " -- radius", default=2, show_default=True,
+              help="The blur radius.")
 @processor
 def blur_cmd(filess, radius):
     """Applies gaussian blur."""
     blur = filesFilter.GaussianBlur(radius)
     for files in filess:
-        click.echo('Blurring "%s" by %dpx' % (files.filename, radius))
+        click.echo("Blurring "%s" by %dpx" % (files.filename, radius))
         yield copy_filename(files.filter(blur), files)
 
 
-@cli.command('smoothen')
-@click.option('-i', '--iterations', default=1, show_default=True,
-              help='How many iterations of the smoothen filter to run.')
+@cli.command("smoothen")
+@click.option("-i", " -- iterations", default=1, show_default=True,
+              help="How many iterations of the smoothen filter to run.")
 @processor
 def smoothen_cmd(filess, iterations):
     """Applies a smoothening filter."""
     for files in filess:
-        click.echo('Smoothening "%s" %d time%s' % (files.filename, iterations, iterations != 1 and 's' or '',))
+        click.echo("Smoothening "%s" %d time%s" %
+                   (files.filename, iterations, iterations != 1 and "s" or "", ))
         for x in xrange(iterations):
             files = copy_filename(files.filter(filesFilter.BLUR), files)
         yield files
 
 
-@cli.command('emboss')
+@cli.command("emboss")
 @processor
 def emboss_cmd(filess):
     """Embosses an files."""
     for files in filess:
-        click.echo('Embossing "%s"' % files.filename)
+        click.echo("Embossing "%s"" % files.filename)
         yield copy_filename(files.filter(filesFilter.EMBOSS), files)
 
 
-@cli.command('sharpen')
-@click.option('-f', '--factor', default=2.0,
-              help='Sharpens the files.', show_default=True)
+@cli.command("sharpen")
+@click.option("-f", " -- factor", default=2.0,
+              help="Sharpens the files.", show_default=True)
 @processor
 def sharpen_cmd(filess, factor):
     """Sharpens an files."""
     for files in filess:
-        click.echo('Sharpen "%s" by %f' % (files.filename, factor))
+        click.echo("Sharpen "%s" by %f" % (files.filename, factor))
         enhancer = filesEnhance.Sharpness(files)
         yield copy_filename(enhancer.enhance(max(1.0, factor)), files)
 
 
-@cli.command('paste')
-@click.option('-l', '--left', default=0, help='Offset from left.')
-@click.option('-r', '--right', default=0, help='Offset from right.')
+@cli.command("paste")
+@click.option("-l", " -- left", default=0, help="Offset from left.")
+@click.option("-r", " -- right", default=0, help="Offset from right.")
 @processor
 def paste_cmd(filess, left, right):
     """Pastes the second files on the first files and leaves the rest
@@ -222,29 +219,28 @@ def paste_cmd(filess, left, right):
             yield files
         return
 
-    click.echo('Paste "%s" on "%s"' % (to_paste.filename, files.filename))
+    click.echo("Paste "%s" on "%s"" % (to_paste.filename, files.filename))
     mask = None
-    if to_paste.mode == 'RGBA' or 'transparency' in to_paste.info:
+    if to_paste.mode == "RGBA" or "transparency" in to_paste.info:
         mask = to_paste
     files.paste(to_paste, (left, right), mask)
-    files.filename += '+' + to_paste.filename
+    files.filename += "+" + to_paste.filename
     yield files
 
     for files in filesiter:
         yield files
 
 
-
 @click.command()
-@click.option('-c', '--configure',
-              type=click.Choice(['upper', 'lower']),
+@click.option("-c", " -- configure",
+              type=click.Choice(["upper", "lower"]),
               prompt=True)
-@click.argument('person', default='you')
+@click.argument("person", default="you")
 def hello(case, person):
     response = "Hello World! Also, hey {} ☺️".format(person)
-    if case == 'upper':
+    if case == "upper":
         click.echo(response.upper())
-    elif case == 'lower':
+    elif case == "lower":
         click.echo(response.lower())
     else:
         click.echo(response)
