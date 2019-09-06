@@ -8,9 +8,6 @@ import multiprocessing
 
 LOGGER = multiprocessing.get_logger()
 LOGGER.setLevel(logging.INFO)
-LOGGER.basicConfig(filename="metamorphosis.log",
-                   format="Metamorphosis - [%(asctime)s] [%(name)s] [%(levelname)s] %(message)s",
-                   level=logging.DEBUG)
 
 
 def info(message):
